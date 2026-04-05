@@ -196,16 +196,6 @@ export DISABLE_API_TESTER=1
 
 更多细节请看 [docs/guides/development-guide.md](docs/guides/development-guide.md)。
 
-### GitHub Actions 自动版本号
-
-如果你用 GitHub Actions 构建镜像，建议在构建时自动注入：
-
-- `APP_RELEASE_VERSION`
-- `APP_GIT_SHA`
-- `APP_IMAGE_TAG`
-
-当前仓库已提供示例工作流，会自动把发布 tag 或分支名写入镜像与前端构建信息。运行中的容器若额外设置了 `APP_IMAGE_TAG`，Web UI 左下角会优先显示运行时镜像标识。
-
 ## API 与 WebSocket
 
 ### REST API
@@ -282,16 +272,6 @@ npm run build
 | [docs/guides/collector-v2-webui-guide.md](docs/guides/collector-v2-webui-guide.md) | Collector V2 Web UI 教程 |
 | [docs/guides/logging-operations.md](docs/guides/logging-operations.md) | 日志治理与排障 |
 | [README_DEV.md](README_DEV.md) | 开发者快捷入口 |
-
-## 审计与已知问题
-
-我已基于当前仓库状态输出了一份正式审计报告，见：
-
-- [docs/open-source-audit-2026-03-31.md](docs/open-source-audit-2026-03-31.md)
-
-审计报告记录了当前仓库的质量问题、风险分析和改进建议。高优先级问题的历史背景与修复建议仍建议结合报告阅读：
-
-- [docs/open-source-audit-2026-03-31.md](docs/open-source-audit-2026-03-31.md)
 
 ## License
 
