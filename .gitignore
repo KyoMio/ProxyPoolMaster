@@ -1,0 +1,100 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/*.log
+logs/*.log.*
+logs/.__*.lock
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+.coverage.*
+.pytest_cache/
+htmlcov/
+.tox/
+
+# Temporary files
+temp_*.py
+*.tmp
+*.bak
+*.old
+
+# Docker volumes (if using local volumes)
+redis_data/
+
+# Memory folder (runtime data)
+memory/
+
+# Snapshots (temporary)
+*snapshot.html
+
+# Screenshots (error screenshots)
+*.png
+
+# Frontend build output (should be built in Docker)
+web-ui/dist/
+web-ui/node_modules/
+
+# Documentation archives
+*.zip
+*.tar.gz
+/docs/archive/
+
+.agents/
+/.codex/
+.omx/
+
+# User configuration file (generated at runtime)
+config.json
+/data/
+/docs/plans/
+!web-ui/src/components/collectors/
+!web-ui/src/components/collectors/**
+
+.worktrees/

@@ -1,0 +1,25 @@
+# Docker Compose Override for Development
+# 此文件用于开发环境配置，会自动覆盖docker-compose.yml中的设置
+# 生产环境部署时不应使用此文件
+
+services:
+  app:
+    # 开发环境挂载源代码，方便热更新
+    volumes:
+      - app_logs:/app/logs
+      - ./src:/app/src
+    # 开发环境显示详细日志
+    environment:
+      - LOG_LEVEL=DEBUG
+      # 开发环境可以设置更短的收集间隔便于测试
+      # - ZDAYE_COLLECT_INTERVAL=60
+      # - FREE_PROXY_LIST_COLLECT_INTERVAL=120
+    # 开发模式不限制资源
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  redis:
+    # 开发环境默认不暴露Redis端口，避免与宿主机已有Redis冲突
+    # 如需直接从宿主机访问容器内Redis，可临时自行添加端口映射

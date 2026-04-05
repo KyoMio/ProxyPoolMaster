@@ -1,0 +1,60 @@
+name: proxypoolmaster-dev
+
+x-dev-build: &dev-build
+  image: proxypoolmaster:dev-local
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      APP_RELEASE_VERSION: ${APP_RELEASE_VERSION:-}
+      APP_GIT_SHA: ${APP_GIT_SHA:-}
+      APP_IMAGE_TAG: ${APP_IMAGE_TAG:-}
+
+x-dev-runtime: &dev-runtime
+  env_file:
+    - .env
+  volumes:
+    - app_logs_dev:/app/logs
+    - ./data/custom_collectors:/app/data/custom_collectors
+    - ./data/config:/app/data/config
+
+services:
+  app:
+    <<: [*dev-build, *dev-runtime]
+    container_name: proxypool_app_dev
+    ports:
+      - "18080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      REDIS_HOST: ${DEV_REDIS_HOST:-host.docker.internal}
+      REDIS_PORT: ${DEV_REDIS_PORT:-6379}
+      COLLECTOR_WORKER_ENABLED: ${APP_COLLECTOR_WORKER_ENABLED:-0}
+      COLLECTOR_WORKER_ID: ${COLLECTOR_WORKER_ID:-collector-worker-dev}
+      CONFIG_FILE: /app/data/config/config.json
+      APP_IMAGE_TAG: ${APP_IMAGE_TAG:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health > /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  collector-worker:
+    <<: *dev-runtime
+    image: proxypoolmaster:dev-local
+    container_name: proxypool_collector_worker_dev
+    command: ["worker"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      REDIS_HOST: ${DEV_REDIS_HOST:-host.docker.internal}
+      REDIS_PORT: ${DEV_REDIS_PORT:-6379}
+      COLLECTOR_WORKER_ID: ${COLLECTOR_WORKER_ID:-collector-worker-dev}
+      CONFIG_FILE: /app/data/config/config.json
+      APP_IMAGE_TAG: ${APP_IMAGE_TAG:-}
+    restart: on-failure
+
+volumes:
+  app_logs_dev:

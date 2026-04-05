@@ -1,0 +1,80 @@
+x-app-image: &app-image
+  image: proxypoolmaster:local
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      APP_RELEASE_VERSION: ${APP_RELEASE_VERSION:-}
+      APP_GIT_SHA: ${APP_GIT_SHA:-}
+      APP_IMAGE_TAG: ${APP_IMAGE_TAG:-}
+
+x-app-runtime: &app-runtime
+  env_file:
+    - .env
+  volumes:
+    - app_logs:/app/logs
+    - ./data/custom_collectors:/app/data/custom_collectors
+    - ./data/config:/app/data/config
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: proxypool_redis
+    environment:
+      TZ: ${TIMEZONE:-Asia/Shanghai}
+    # 生产环境不暴露Redis端口，仅内部访问
+    # ports:
+    #   - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+    command: redis-server --replica-read-only no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  app:
+    <<: [*app-image, *app-runtime]
+    container_name: proxypool_app
+    ports:
+      - "8080:8080" # Nginx listens on port 8080 inside the container, map to host port 8080
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TIMEZONE: ${TIMEZONE:-Asia/Shanghai}
+      TZ: ${TIMEZONE:-Asia/Shanghai}
+      CONFIG_FILE: /app/data/config/config.json
+      APP_IMAGE_TAG: ${APP_IMAGE_TAG:-}
+    depends_on:
+      redis:
+        condition: service_healthy # 等待Redis健康后才启动
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health > /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  collector-worker:
+    <<: [*app-image, *app-runtime]
+    container_name: proxypool_collector_worker
+    command: ["worker"]
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TIMEZONE: ${TIMEZONE:-Asia/Shanghai}
+      TZ: ${TIMEZONE:-Asia/Shanghai}
+      CONFIG_FILE: /app/data/config/config.json
+      APP_IMAGE_TAG: ${APP_IMAGE_TAG:-}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: on-failure
+
+volumes:
+  redis_data:
+  app_logs:
